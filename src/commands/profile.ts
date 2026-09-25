@@ -71,8 +71,17 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     if (userInfo.avatarUrl) {
         embed.setThumbnail(userInfo.avatarUrl)
     }
+    if (userInfo.bannerUrl) {
+        embed.setImage(userInfo.bannerUrl)
+    }
     embed.setFooter({
         text: userInfo.id
+    })
+    embed.addFields({
+        name: "その他の情報",
+        value: `
+アカウント作成日: ${userInfo.createdAt}
+`
     })
 
     await interaction.followUp({

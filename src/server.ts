@@ -1,24 +1,10 @@
 import express from "express";
-import session from "express-session";
 import { loginSession } from "./cache/session.js";
 import { AuthorizationCode } from "simple-oauth2";
 import { mongoClient } from "./session.js";
 import { encryptToken } from "./lib/encrypt.js";
 
 export const app = express();
-
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET ?? "CHANGE_ME",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-    },
-  }),
-);
 
 app.get('/', async (req, res) => {
     res.send('ここには何もないよ<br><link rel="redirect_uri" href="' + process.env.REDIRECT_URI_PATH + '">');
@@ -92,7 +78,7 @@ app.get('/misskey/callback', async (req, res) => {
             upsert: true
         })
 
-        res.send("成功！登録しました！");
+        res.send("<h1>成功！登録しました！</h1>");
     } catch (error) {
         console.log(error)
         // Wreck errors include the request, which can contain codes and tokens.
