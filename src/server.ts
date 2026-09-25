@@ -79,7 +79,7 @@ app.get('/misskey/callback', async (req, res) => {
             code_verifier: oauth.codeVerifier,
         };
         const token = await oauthClient.getToken(tokenParams);
-        console.log(token)
+        // console.log(token)
 
         await mongoClient.db("MisskeyCode").collection("LoginCode").updateOne({
             discordUserId: oauth.discordUserId,
