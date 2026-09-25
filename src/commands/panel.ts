@@ -1,12 +1,15 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ChatInputCommandInteraction, Colors, EmbedBuilder, InteractionType, MessageFlags, SlashCommandBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ChatInputCommandInteraction, Colors, EmbedBuilder, InteractionType, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { mongoClient } from "../session.js";
+import { defaultGuildInstance } from "../lib/instance.js";
 
-export const data = new SlashCommandBuilder().setName("panel").setDescription("MisskeyとDiscordを連携するパネルを設置します。").addStringOption((option) => option.setName("instance").setDescription("Misskeyのインスタンスを指定してください。").setRequired(true));
+export const data = new SlashCommandBuilder().setName("panel").setDescription("MisskeyとDiscordを連携するパネルを設置します。").addStringOption((option) => option.setName("instance").setDescription("Misskeyのインスタンスを指定してください。").setRequired(false)).setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels);
 
 export async function execute(interaction: ChatInputCommandInteraction) {
     if (interaction.type != InteractionType.ApplicationCommand) {
         return;
     }
+
+    if (!interaction.guildId) return;
 
     if (interaction.channel?.type != ChannelType.GuildText) {
         await interaction.reply({
@@ -20,7 +23,17 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         flags: [MessageFlags.Ephemeral]
     });
 
-    const instance = interaction.options.getString("instance", true);
+    let instance = interaction.options.getString("instance", false);
+    if (!instance) {
+        instance = await defaultGuildInstance(interaction.guildId);
+        if (!instance) {
+            await interaction.followUp({
+                flags: [MessageFlags.Ephemeral],
+                content: "❌️インスタンスが指定されていません。"
+            })
+            return;
+        }
+    }
 
     const message = await interaction.channel.send({
         embeds: [new EmbedBuilder().setTitle("Misskeyと連携する").setDescription("以下のボタンから連携を開始できます。").setColor(Colors.Green).setFooter({

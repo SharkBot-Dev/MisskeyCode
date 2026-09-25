@@ -1,21 +1,33 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ChatInputCommandInteraction, Colors, EmbedBuilder, InteractionType, MessageFlags, SlashCommandBuilder } from "discord.js";
-import { mongoClient } from "../session.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, Colors, EmbedBuilder, InteractionType, MessageFlags, SlashCommandBuilder } from "discord.js";
 import crypto from "node:crypto";
 import { loginSession } from "../cache/session.js";
 import { oauth2Cache } from "../cache/instance.js";
+import { defaultGuildInstance } from "../lib/instance.js";
 
-export const data = new SlashCommandBuilder().setName("login").setDescription("Misskeyと連携を開始します。").addStringOption((option) => option.setName("instance").setDescription("Misskeyのインスタンスを指定してください。").setRequired(true));
+export const data = new SlashCommandBuilder().setName("login").setDescription("Misskeyと連携を開始します。").addStringOption((option) => option.setName("instance").setDescription("Misskeyのインスタンスを指定してください。").setRequired(false));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
     if (interaction.type != InteractionType.ApplicationCommand) {
         return;
     }
 
+    if (!interaction.guildId) return;
+
     await interaction.deferReply({
         flags: [MessageFlags.Ephemeral]
     });
 
-    const instance = interaction.options.getString("instance", true);
+    let instance = interaction.options.getString("instance", false);
+    if (!instance) {
+        instance = await defaultGuildInstance(interaction.guildId);
+        if (!instance) {
+            await interaction.followUp({
+                flags: [MessageFlags.Ephemeral],
+                content: "❌️インスタンスが指定されていません。"
+            })
+            return;
+        }
+    }
 
     let oauth2CacheData = oauth2Cache.get(instance);
     if (!oauth2CacheData) {

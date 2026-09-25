@@ -1,11 +1,12 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ChatInputCommandInteraction, Colors, EmbedBuilder, InteractionType, MessageFlags, SlashCommandBuilder } from "discord.js";
+import { ChatInputCommandInteraction, Colors, EmbedBuilder, InteractionType, MessageFlags, SlashCommandBuilder } from "discord.js";
 import { mongoClient } from "../session.js";
 import { decryptToken } from "../lib/encrypt.js";
+import { defaultGuildInstance } from "../lib/instance.js";
 
 export const data = new SlashCommandBuilder()
                     .setName("profile").
                     setDescription("Misskeyのプロフィールを取得します。")
-                    .addStringOption((option) => option.setName("instance").setDescription("Misskeyのインスタンスを指定してください。").setRequired(true))
+                    .addStringOption((option) => option.setName("instance").setDescription("Misskeyのインスタンスを指定してください。").setRequired(false))
                     .addUserOption((option) => option.setName("user").setDescription("Discordのユーザーを指定してください。").setRequired(false));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -13,9 +14,22 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         return;
     }
 
+    if (!interaction.guildId) return;
+
     await interaction.deferReply();
 
-    const instance = interaction.options.getString("instance", true);
+    let instance = interaction.options.getString("instance", false);
+    if (!instance) {
+        instance = await defaultGuildInstance(interaction.guildId);
+        if (!instance) {
+            await interaction.followUp({
+                flags: [MessageFlags.Ephemeral],
+                content: "❌️インスタンスが指定されていません。"
+            })
+            return;
+        }
+    }
+    
     let user = interaction.options.getUser("user", false);
     if (!user) {
         user = interaction.user
