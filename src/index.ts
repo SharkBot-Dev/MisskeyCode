@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits } from "discord.js"
+import { Client, Events, GatewayIntentBits } from "discord.js"
 
 import { config } from "dotenv"
 
@@ -89,3 +89,11 @@ async function load() {
 load();
 
 client.login(process.env.DISCORD_TOKEN)
+
+client.on(Events.ShardError, (error) => {
+	console.error('A websocket connection encountered an error:', error);
+});
+
+process.on('unhandledRejection', (error) => {
+	console.error('Unhandled promise rejection:', error);
+});
