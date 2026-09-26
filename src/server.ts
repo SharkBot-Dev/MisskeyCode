@@ -84,6 +84,10 @@ app.get('/privacy', async (req, res) => {
 </p>`);
 });
 
+app.get('/invite', async (req, res) => {
+    res.redirect("https://discord.com/oauth2/authorize?client_id=1552998174564552754");
+});
+
 app.get('/misskey/callback', async (req, res) => {
     const { code, state } = req.query;
     res.setHeader("Cache-Control", "no-store");

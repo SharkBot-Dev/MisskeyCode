@@ -1,8 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ChatInputCommandInteraction, Colors, EmbedBuilder, InteractionType, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { mongoClient } from "../session.js";
-import { decryptToken } from "../lib/encrypt.js";
 import { defaultGuildInstance } from "../lib/instance.js";
-import { isValidDomain } from "../lib/domain.js";
 
 export const data = new SlashCommandBuilder()
                     .setName("rp").
@@ -42,14 +40,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
             })
             return;
         }
-    }
-
-    if (!isValidDomain(instance)) {
-        await interaction.followUp({
-            flags: [MessageFlags.Ephemeral],
-            content: "❌️インスタンスのドメインがおかしいです。\n\n-# 例: `misskey.io`、`example.com`"
-        })
-        return;
     }
 
     let title = interaction.options.getString("title", false);

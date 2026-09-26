@@ -1,7 +1,6 @@
 import { ChatInputCommandInteraction, InteractionType, MessageFlags, SlashCommandBuilder } from "discord.js";
 import { mongoClient } from "../session.js";
 import { defaultGuildInstance } from "../lib/instance.js";
-import { isValidDomain } from "../lib/domain.js";
 
 export const data = new SlashCommandBuilder().setName("logout").setDescription("Misskeyと連携を解除します。").addStringOption((option) => option.setName("instance").setDescription("Misskeyのインスタンスを指定してください。").setRequired(false));
 
@@ -26,14 +25,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
             })
             return;
         }
-    }
-
-    if (!isValidDomain(instance)) {
-        await interaction.followUp({
-            flags: [MessageFlags.Ephemeral],
-            content: "❌️インスタンスのドメインがおかしいです。\n\n-# 例: `misskey.io`、`example.com`"
-        })
-        return;
     }
 
     const collection = mongoClient.db("MisskeyCode").collection("LoginCode");
