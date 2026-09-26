@@ -43,45 +43,53 @@ export async function execute(interaction: ButtonInteraction, client: Client) {
 
     const accessToken = decryptToken(database.accessToken);
 
-    const userInfoRes = await fetch(`https://${message.instance}/api/i`, {
-        method: "POST",
-        headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({}),
-    });
+    try {
+        const userInfoRes = await fetch(`https://${message.instance}/api/i`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({}),
+        });
 
-    if (userInfoRes.status != 200) {
+        if (userInfoRes.status != 200) {
+            await interaction.followUp({
+                flags: [MessageFlags.Ephemeral],
+                content: "❌️`/login`から連携する必要があります。"
+            })
+            return;
+        }
+
+        const roleId = customId.split("_")[1];
+        if (!roleId) {
+            await interaction.followUp({
+                flags: [MessageFlags.Ephemeral],
+                content: "❌️不明なロール"
+            })
+            return;
+        }
+
+        const member = await interaction.guild?.members.fetch(interaction.user.id);
+
+        if (member?.roles.cache.has(roleId)) {
+            await member.roles.remove(roleId);
+            await interaction.followUp({
+                flags: [MessageFlags.Ephemeral],
+                content: `✅ <@&${roleId}>を剥奪しました。`
+            })
+        } else {
+            await member?.roles.add(roleId);
+            await interaction.followUp({
+                flags: [MessageFlags.Ephemeral],
+                content: `✅ <@&${roleId}>を追加しました。`
+            })
+        }
+    } catch {
         await interaction.followUp({
             flags: [MessageFlags.Ephemeral],
-            content: "❌️`/login`から連携する必要があります。"
+            content: "❌️不明なエラーが発生しました。"
         })
         return;
-    }
-
-    const roleId = customId.split("_")[1];
-    if (!roleId) {
-        await interaction.followUp({
-            flags: [MessageFlags.Ephemeral],
-            content: "❌️不明なロール"
-        })
-        return;
-    }
-
-    const member = await interaction.guild?.members.fetch(interaction.user.id);
-
-    if (member?.roles.cache.has(roleId)) {
-        await member.roles.remove(roleId);
-        await interaction.followUp({
-            flags: [MessageFlags.Ephemeral],
-            content: `✅ <@&${roleId}>を剥奪しました。`
-        })
-    } else {
-        await member?.roles.add(roleId);
-        await interaction.followUp({
-            flags: [MessageFlags.Ephemeral],
-            content: `✅ <@&${roleId}>を追加しました。`
-        })
     }
 }

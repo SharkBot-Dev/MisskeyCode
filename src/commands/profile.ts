@@ -58,42 +58,50 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     const accessToken = decryptToken(database.accessToken);
 
-    const userInfoRes = await fetch(`https://${instance}/api/i`, {
-        method: "POST",
-        headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({}),
-    });
+    try {
+        const userInfoRes = await fetch(`https://${instance}/api/i`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({}),
+        });
 
-    if (userInfoRes.status != 200) {
+        if (userInfoRes.status != 200) {
+            await interaction.followUp({
+                content: "❌️`/login`から連携する必要があります。"
+            })
+            return;
+        }
+
+        const userInfo = await userInfoRes.json();
+
+        const embed = new EmbedBuilder().setTitle(userInfo.username).setDescription(userInfo.description).setColor(Colors.Green);
+        if (userInfo.avatarUrl) {
+            embed.setThumbnail(userInfo.avatarUrl)
+        }
+        if (userInfo.bannerUrl) {
+            embed.setImage(userInfo.bannerUrl)
+        }
+        embed.setFooter({
+            text: userInfo.id
+        })
+        embed.addFields({
+            name: "その他の情報",
+            value: `
+    アカウント作成日: ${userInfo.createdAt}
+    `
+        })
+
         await interaction.followUp({
-            content: "❌️`/login`から連携する必要があります。"
+            embeds: [embed]
+        })
+    } catch {
+        await interaction.followUp({
+            flags: [MessageFlags.Ephemeral],
+            content: "❌️不明なエラーが発生しました。"
         })
         return;
     }
-
-    const userInfo = await userInfoRes.json();
-
-    const embed = new EmbedBuilder().setTitle(userInfo.username).setDescription(userInfo.description).setColor(Colors.Green);
-    if (userInfo.avatarUrl) {
-        embed.setThumbnail(userInfo.avatarUrl)
-    }
-    if (userInfo.bannerUrl) {
-        embed.setImage(userInfo.bannerUrl)
-    }
-    embed.setFooter({
-        text: userInfo.id
-    })
-    embed.addFields({
-        name: "その他の情報",
-        value: `
-アカウント作成日: ${userInfo.createdAt}
-`
-    })
-
-    await interaction.followUp({
-        embeds: [embed]
-    })
 }
