@@ -84,7 +84,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         await interaction.followUp({
             flags: [MessageFlags.Ephemeral],
             components: [new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setLabel("Misskeyを開く").setURL(authorizeUrl).setStyle(ButtonStyle.Link))],
-            embeds: [new EmbedBuilder().setTitle("連携を行う").setDescription("連携を行うには、以下のMisskeyを開くを押してください。").setColor(Colors.Blue)]
+            embeds: [new EmbedBuilder().setTitle("連携を行う").setDescription("連携を行うには、以下のMisskeyを開くを押してください。").setFooter({
+                text: "5分以内に認証を完了させてください。"
+            }).setColor(Colors.Blue)]
         })
     } catch {
         await interaction.followUp({

@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, Client, Colors, Guild, InteractionType, MessageFlags, PermissionFlagsBits, type ChatInputCommandInteraction } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, Client, Colors, Guild, PermissionFlagsBits } from "discord.js";
 
 export async function execute(guild: Guild, client: Client) {
     console.log(`${guild.name} (${guild.id})に参加しました。`);

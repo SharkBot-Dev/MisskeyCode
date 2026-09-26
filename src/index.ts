@@ -10,6 +10,7 @@ import path from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import { app } from "./server.js";
 import { connectDB } from "./session.js";
+import { setCron } from "./cron.js";
 
 const client = new Client({
     intents: [GatewayIntentBits.GuildMessages, GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent]
@@ -80,6 +81,8 @@ async function load() {
 
     await loadCommands();
     await loadEvents();
+
+    await setCron();
 
     app.listen(5000, () => {
         console.log('Server listening on port 5000');
