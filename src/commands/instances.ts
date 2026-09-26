@@ -19,7 +19,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         discordUserId: interaction.user.id,
     }).toArray();
 
-    const embed = new EmbedBuilder().setTitle("あなたのMisskeyインスタンス一覧です。");
+    const embed = new EmbedBuilder().setTitle("あなたのMisskeyインスタンス一覧");
     let description = ""
     for (const i of instances) {
         description += `${i.instance}\n`
